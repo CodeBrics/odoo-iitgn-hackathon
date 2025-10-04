@@ -1,0 +1,10 @@
+{% extends "expenses/base.html" %}
+{% block content %}
+<h2>Sign up (Create Company + Admin)</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn" type="submit">Create</button>
+</form>
+<p>Note: Country code example: US, IN, GB. Currency will be auto-set via REST Countries API.</p>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "expenses/base.html" %}
+{% block content %}
+<h2>Approvals Queue</h2>
+<table>
+  <thead><tr><th>#</th><th>Submitter</th><th>Amount</th><th>Converted</th><th>Action</th></tr></thead>
+  <tbody>
+  {% for step in pending %}
+    <tr>
+      <td>{{ step.expense.id }}</td>
+      <td>{{ step.expense.submitter }}</td>
+      <td>{{ step.expense.amount }} {{ step.expense.currency_code }}</td>
+      <td>{{ step.expense.amount_converted }} {{ step.expense.company.currency_code }}</td>
+      <td>
+        <a class="btn" href="{% url 'approve_expense' step.expense.id %}">Approve</a>
+        <a class="btn secondary" href="{% url 'reject_expense' step.expense.id %}">Reject</a>
+      </td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="5">No pending approvals.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

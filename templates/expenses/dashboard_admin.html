@@ -1,0 +1,18 @@
+{% extends "expenses/base.html" %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+<div class="row">
+  <div class="card"><strong>Users:</strong> {{ admin_stats.users }}</div>
+  <div class="card"><strong>Expenses:</strong> {{ admin_stats.expenses }}</div>
+  <div class="card"><strong>Pending approvals:</strong> {{ admin_stats.pending }}</div>
+</div>
+<hr />
+<div class="row">
+  <a class="btn" href="{% url 'company_settings' %}">Company Settings</a>
+  <a class="btn" href="{% url 'policy_settings' %}">Approval Policy</a>
+  <a class="btn" href="{% url 'manage_stages' %}">Approver Stages</a>
+  <a class="btn" href="{% url 'assign_roles' %}">Assign Roles</a>
+</div>
+<hr />
+<p>Manage users, roles, stages, and policies directly from this app. Use the links above to configure everything.</p>
+{% endblock %}

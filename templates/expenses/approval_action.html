@@ -1,0 +1,16 @@
+{% extends "expenses/base.html" %}
+{% block content %}
+<h2>{{ action }} Expense #{{ expense.id }}</h2>
+<p>
+  Amount: <strong>{{ expense.amount }} {{ expense.currency_code }}</strong>
+  ({{ expense.amount_converted }} {{ expense.company.currency_code }})<br/>
+  Category: {{ expense.category }}<br/>
+  Description: {{ expense.description|default:"-" }}<br/>
+  Date: {{ expense.expense_date }}
+</p>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn" type="submit">{{ action }}</button>
+</form>
+{% endblock %}

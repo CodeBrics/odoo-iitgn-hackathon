@@ -1,0 +1,20 @@
+{% extends "expenses/base.html" %}
+{% block content %}
+<h2>Assign Roles (Finance/Director/CFO)</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn" type="submit">Assign</button>
+</form>
+<hr />
+<table>
+  <thead><tr><th>Role</th><th>User</th></tr></thead>
+  <tbody>
+    {% for a in assignments %}
+      <tr><td>{{ a.role_name }}</td><td>{{ a.user }}</td></tr>
+    {% empty %}
+      <tr><td colspan="2">No assignments yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

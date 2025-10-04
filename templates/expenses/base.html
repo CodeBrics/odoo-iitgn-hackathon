@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Expense Approvals</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background: #f6f7f9; }
+      header, footer { background: #0b57d0; color: #fff; padding: 12px 16px; }
+      main { max-width: 1000px; margin: 16px auto; background: #fff; border-radius: 8px; padding: 16px; }
+      a { color: #0b57d0; text-decoration: none; }
+      .btn { display: inline-block; padding: 8px 12px; background: #0b57d0; color: #fff; border-radius: 6px; }
+      .btn.secondary { background: #333; }
+      .row { display: flex; gap: 12px; flex-wrap: wrap; }
+      .card { border: 1px solid #e6e8eb; border-radius: 8px; padding: 16px; background: #fff; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; }
+      .flash { padding: 10px; background: #e8f0fe; border: 1px solid #c6dafc; margin-bottom: 12px; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="row" style="justify-content: space-between; align-items: center;">
+        <div><strong>Expense Approvals</strong></div>
+        <nav>
+          {% if user.is_authenticated %}
+            <a class="btn" href="{% url 'dashboard' %}">Dashboard</a>
+            {% if user.role == "EMPLOYEE" %}
+              <a class="btn" href="{% url 'expense_create' %}">Submit Expense</a>
+              <a class="btn" href="{% url 'my_expenses' %}">My Expenses</a>
+            {% endif %}
+            {% if user.role == "MANAGER" %}
+              <a class="btn" href="{% url 'approvals_queue' %}">Approvals</a>
+            {% endif %}
+            {% if user.role == "ADMIN" %}
+              <a class="btn" href="{% url 'company_settings' %}">Company</a>
+              <a class="btn" href="{% url 'policy_settings' %}">Policy</a>
+              <a class="btn" href="{% url 'manage_stages' %}">Stages</a>
+              <a class="btn" href="{% url 'assign_roles' %}">Roles</a>
+              <a class="btn" href="{% url 'users_list' %}">Users</a>
+              <a class="btn" href="{% url 'admin_expenses' %}">All Expenses</a>
+            {% endif %}
+            <a class="btn secondary" href="{% url 'logout' %}">Logout</a>
+          {% else %}
+            <a class="btn" href="{% url 'login' %}">Login</a>
+            <a class="btn secondary" href="{% url 'signup' %}">Sign up</a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+    <main>
+      {% if messages %}
+        {% for m in messages %}
+          <div class="flash">{{ m }}</div>
+        {% endfor %}
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+    <footer>
+      <small>&copy; {{ now|date:"Y" }} Expense Approvals</small>
+    </footer>
+  </body>
+</html>

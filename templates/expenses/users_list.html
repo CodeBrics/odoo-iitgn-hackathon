@@ -1,0 +1,21 @@
+{% extends "expenses/base.html" %}
+{% block content %}
+<h2>Users</h2>
+<p><a class="btn" href="{% url 'user_new' %}">Create User</a></p>
+<table>
+  <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Manager</th><th></th></tr></thead>
+  <tbody>
+  {% for u in users %}
+    <tr>
+      <td>{{ u.username }}</td>
+      <td>{{ u.email }}</td>
+      <td>{{ u.role }}</td>
+      <td>{{ u.manager|default:"-" }}</td>
+      <td><a class="btn" href="{% url 'user_edit' u.id %}">Edit</a></td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="5">No users yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

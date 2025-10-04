@@ -1,0 +1,22 @@
+{% extends "expenses/base.html" %}
+{% block content %}
+<h2>My Expenses</h2>
+<table>
+  <thead><tr><th>#</th><th>Amount</th><th>Converted</th><th>Category</th><th>Date</th><th>Status</th><th>Receipt</th></tr></thead>
+  <tbody>
+  {% for e in expenses %}
+    <tr>
+      <td>{{ e.id }}</td>
+      <td>{{ e.amount }} {{ e.currency_code }}</td>
+      <td>{{ e.amount_converted }} {{ e.company.currency_code }}</td>
+      <td>{{ e.category }}</td>
+      <td>{{ e.expense_date }}</td>
+      <td>{{ e.status }}</td>
+      <td>{% if e.receipt %}<a href="{{ e.receipt.url }}" target="_blank">View</a>{% else %}-{% endif %}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="7">No expenses yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

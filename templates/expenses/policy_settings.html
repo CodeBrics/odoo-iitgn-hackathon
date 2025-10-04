@@ -1,0 +1,16 @@
+{% extends "expenses/base.html" %}
+{% block content %}
+<h2>Approval Policy</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn" type="submit">Save Policy</button>
+</form>
+<p><small>Modes:
+<ul>
+  <li>Percentage: Approve when N% of assigned approvers have approved.</li>
+  <li>Specific Approver: If specific approver (e.g., CFO) approves, auto-approved.</li>
+  <li>Percentage OR Specific: Either condition approves.</li>
+</ul>
+</small></p>
+{% endblock %}

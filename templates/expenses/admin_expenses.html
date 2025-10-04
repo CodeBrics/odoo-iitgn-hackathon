@@ -1,0 +1,24 @@
+{% extends "expenses/base.html" %}
+{% block content %}
+<h2>All Expenses (Admin)</h2>
+<table>
+  <thead><tr><th>#</th><th>Submitter</th><th>Amount</th><th>Converted</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>
+  {% for e in expenses %}
+    <tr>
+      <td>{{ e.id }}</td>
+      <td>{{ e.submitter }}</td>
+      <td>{{ e.amount }} {{ e.currency_code }}</td>
+      <td>{{ e.amount_converted }} {{ e.company.currency_code }}</td>
+      <td>{{ e.status }}</td>
+      <td>
+        <a class="btn" href="{% url 'admin_override_approve' e.id %}">Override Approve</a>
+        <a class="btn secondary" href="{% url 'admin_override_reject' e.id %}">Override Reject</a>
+      </td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6">No expenses found.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

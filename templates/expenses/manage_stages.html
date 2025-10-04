@@ -1,0 +1,27 @@
+{% extends "expenses/base.html" %}
+{% block content %}
+<h2>Approver Stages (Sequence)</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn" type="submit">Add Stage</button>
+</form>
+<hr />
+<table>
+  <thead><tr><th>Seq</th><th>Name</th><th>Role</th><th>Specific User</th><th></th></tr></thead>
+  <tbody>
+    {% for s in stages %}
+    <tr>
+      <td>{{ s.sequence }}</td>
+      <td>{{ s.name }}</td>
+      <td>{{ s.role_name|default:"-" }}</td>
+      <td>{{ s.specific_user|default:"-" }}</td>
+      <td><a class="btn secondary" href="{% url 'delete_stage' s.id %}">Delete</a></td>
+    </tr>
+    {% empty %}
+      <tr><td colspan="5">No stages configured.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+<p><small>Tip: If Manager-first is enabled, the submitter’s manager is auto-added as Step 1.</small></p>
+{% endblock %}

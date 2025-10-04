@@ -1,0 +1,10 @@
+{% extends "expenses/base.html" %}
+{% block content %}
+<h2>Login</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn" type="submit">Login</button>
+</form>
+<p>First time? <a href="{% url 'signup' %}">Create your company & admin</a></p>
+{% endblock %}

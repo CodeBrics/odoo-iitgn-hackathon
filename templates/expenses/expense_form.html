@@ -1,0 +1,13 @@
+{% extends "expenses/base.html" %}
+{% block content %}
+<h2>Submit Expense</h2>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <p><small>Company currency: {{ company_currency }}</small></p>
+  <div class="row">
+    <button class="btn secondary" type="submit" name="action" value="autofill">Autofill from Receipt</button>
+    <button class="btn" type="submit" name="action" value="submit">Submit</button>
+  </div>
+</form>
+{% endblock %}
