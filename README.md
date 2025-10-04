@@ -1,4 +1,6 @@
-Odoo Expense Management System
+# Odoo Expense Management System
+
+Video Link: https://youtu.be/_SSfEcu_pn8?si=Q8ZrhVDzGxCbs2dt
 
 This repository contains the front-end code for a web-based expense management system, developed as a solution to the problem of time-consuming, error-prone, and manual expense reimbursement processes in companies. The system is designed to provide a simple and transparent way to manage expenses, supporting multi-level and conditional approval workflows.
 
