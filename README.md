@@ -19,7 +19,7 @@ Companies often struggle with manual expense reimbursement processes that are ti
 -----
     Key Features
 
-      Authentication & User Management  : The system automatically creates a new company and an admin user upon the first login or signup.  The admin can then create and manage employees and managers, assigning them roles and defining reporting relationships
+Authentication & User Management  : The system automatically creates a new company and an admin user upon the first login or signup.  The admin can then create and manage employees and managers, assigning them roles and defining reporting relationships
       Expense Submission (Employee)  : Employees can submit new expense claims, including details like the amount, category, description, and date. They can also view their own expense history (approved, rejected) .
       Approval Workflow (Manager/Admin)  : The system supports multi-level approval flows with a defined sequence of approvers.  An expense claim moves to the next approver's account only after the current one has approved or rejected it.  Managers and admins can view expenses awaiting their approval and approve or reject them with comments.
       Conditional Approval Rules  : The platform can support various conditional approval rules, such as a percentage rule (e.g., if 60% of approvers approve, the expense is approved) or a specific approver rule (e.g., if a CFO approves, the expense is auto-approved) .  These rules can be combined to create hybrid workflows.
@@ -33,11 +33,11 @@ Companies often struggle with manual expense reimbursement processes that are ti
 
     Tech Stack
 
-      HTML  : Provides the structure for the web pages.
+ HTML  : Provides the structure for the web pages.
       CSS  : Styled with Tailwind CSS for rapid and consistent UI development.
       JavaScript  : Manages dynamic content, user interactions, and view rendering.
       APIs  :
-         `https://restcountries.com/v3.1/all?fields=name,currencies`: Used to fetch country and currency information 48].
+      `https://restcountries.com/v3.1/all?fields=name,currencies`: Used to fetch country and currency information 48].
          `https://api.exchangerate-api.com/v4/latest/{BASE_CURRENCY}`: Used for currency conversions to display expense amounts in the company's default currency.
 
 -----
