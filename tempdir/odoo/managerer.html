@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innovate Corp | Employee Dashboard</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2c2c2c;
+            --bg-tertiary: #3a3a3a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #444444;
+            --accent-primary: #8a63d2;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #facc15;
+            --font-main: 'Inter', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .custom-input, .custom-select {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .custom-input:focus, .custom-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(138, 99, 210, 0.3);
+        }
+        .custom-input::placeholder { color: var(--text-secondary); opacity: 0.7; }
+        .custom-select option { background-color: var(--bg-secondary); }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background-color: var(--accent-primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background-color: #6a4a9f; }
+        .btn-secondary { background-color: var(--bg-tertiary); color: var(--text-primary); }
+        .btn-secondary:hover:not(:disabled) { background-color: var(--border-color); }
+        
+        .toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .toast {
+            padding: 12px 16px; border-radius: 8px; color: white; font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); animation: slideInUp 0.4s ease-out;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .toast.success { background-color: var(--success); }
+        .toast.info { background-color: var(--accent-primary); }
+
+        .spinner {
+            width: 20px; height: 20px; border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+        .tab.active {
+            color: var(--accent-primary);
+            border-bottom-color: var(--accent-primary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="p-4 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">Innovate Corp | Employee</h1>
+            <button class="btn btn-secondary text-sm py-2">Logout</button>
+        </div>
+    </header>
+
+    <main id="employee-dashboard-container" class="max-w-7xl mx-auto p-4 md:p-8">
+        <!-- Employee Dashboard content is rendered here by JavaScript -->
+    </main>
+    
+    <div id="toast-container"></div>
+
+    <script type="module">
+        const employeeDashboardContainer = document.getElementById('employee-dashboard-container');
+        const toastContainer = document.getElementById('toast-container');
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            currentUser: { id: 'employee1', name: 'Marc' },
+            expenses: [
+                { id: 'exp101', userId: 'employee1', amount: 75.50, currency: 'USD', category: 'Travel', description: 'Taxi to client meeting', date: '2025-10-03', status: 'Approved', paidBy: 'Marc', remarks: 'Met with Acme Corp' },
+                { id: 'exp102', userId: 'employee1', amount: 1200, currency: 'INR', category: 'Food', description: 'Restaurant bill for team lunch', date: '2025-10-02', status: 'Pending', paidBy: 'Marc', remarks: '' },
+                 { id: 'exp103', userId: 'employee1', amount: 35.00, currency: 'EUR', category: 'Supplies', description: 'Stationery for office', date: '2025-09-28', status: 'Rejected', paidBy: 'Marc', remarks: 'Not a valid business expense' },
+            ],
+            ui: {
+                activeTab: 'submitted',
+                toastMessages: [],
+            }
+        };
+
+        // --- TEMPLATES ---
+        const templates = {
+            dashboard: () => `
+                ${templates.summaryCards()}
+                ${templates.tabs()}
+                <div id="tab-content-container" class="mt-6">
+                    ${state.ui.activeTab === 'submitted' ? templates.submittedView() : templates.newExpenseView()}
+                </div>
+            `,
+
+            summaryCards: () => {
+                const pendingCount = state.expenses.filter(e => e.status === 'Pending').length;
+                return `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <div class="card p-4">
+                            <h4 class="text-sm text-gray-400">To Submit</h4>
+                            <p class="text-2xl font-bold">0</p>
+                        </div>
+                        <div class="card p-4">
+                            <h4 class="text-sm text-gray-400">Waiting Approval</h4>
+                            <p class="text-2xl font-bold">${pendingCount}</p>
+                        </div>
+                    </div>`;
+            },
+            
+            tabs: () => `
+                <div class="flex border-b border-gray-700">
+                    <div class="tab ${state.ui.activeTab === 'submitted' ? 'active' : ''}" data-tab="submitted">Submitted</div>
+                    <div class="tab ${state.ui.activeTab === 'new' ? 'active' : ''}" data-tab="new">New</div>
+                </div>`,
+
+            submittedView: () => {
+                const statusClass = {
+                    'Approved': 'text-green-400',
+                    'Pending': 'text-yellow-400',
+                    'Rejected': 'text-red-400',
+                };
+                return `
+                    <div class="overflow-x-auto card">
+                        <table class="w-full text-left">
+                            <thead class="text-sm text-gray-400 border-b border-gray-700"><tr>
+                                <th class="p-3">Description</th><th class="p-3">Date</th><th class="p-3">Category</th><th class="p-3">Amount</th><th class="p-3">Status</th>
+                            </tr></thead>
+                            <tbody>
+                            ${state.expenses.map(e => `
+                                <tr class="border-b border-gray-800 last:border-b-0">
+                                    <td class="p-3">${e.description}</td>
+                                    <td class="p-3">${e.date}</td>
+                                    <td class="p-3">${e.category}</td>
+                                    <td class="p-3">${e.amount.toFixed(2)} ${e.currency}</td>
+                                    <td class="p-3"><span class="font-semibold ${statusClass[e.status] || ''}">${e.status}</span></td>
+                                </tr>
+                            `).join('') || `<tr><td colspan="5" class="text-center p-8 text-gray-500">No expenses submitted yet.</td></tr>`}
+                            </tbody>
+                        </table>
+                    </div>`;
+            },
+            
+            newExpenseView: () => `
+                <div class="card p-8 max-w-2xl mx-auto">
+                    <h3 class="text-xl font-bold mb-6">New Expense Report</h3>
+                    <form id="new-expense-form" class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                        <div class="sm:col-span-2">
+                            <label for="exp-desc" class="text-xs font-medium text-gray-400">Description</label>
+                            <input id="exp-desc" name="description" class="custom-input w-full mt-1" placeholder="e.g., Taxi to client meeting" required>
+                        </div>
+                        <div>
+                            <label for="exp-cat" class="text-xs font-medium text-gray-400">Category</label>
+                            <input id="exp-cat" name="category" class="custom-input w-full mt-1" placeholder="e.g., Travel" required>
+                        </div>
+                        <div>
+                           <label for="exp-paidby" class="text-xs font-medium text-gray-400">Paid By</label>
+                           <input id="exp-paidby" name="paidBy" class="custom-input w-full mt-1" required value="${state.currentUser.name}">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="exp-amount" class="text-xs font-medium text-gray-400">Total Amount</label>
+                             <div class="flex items-center border border-gray-700 rounded-md mt-1 focus-within:border-accent-primary focus-within:ring-2 focus-within:ring-accent-primary/20">
+                                 <input id="exp-amount" name="amount" type="number" step="0.01" class="custom-input !border-none !ring-0 flex-grow" placeholder="567.89" required>
+                                 <select name="currency" class="custom-select !border-none !ring-0 w-28 bg-gray-800 rounded-r-md"><option>USD</option><option>INR</option><option>EUR</option></select>
+                             </div>
+                        </div>
+                        <div>
+                            <label for="exp-date" class="text-xs font-medium text-gray-400">Expense Date</label>
+                            <input id="exp-date" name="date" type="date" class="custom-input w-full mt-1 text-gray-400" required>
+                        </div>
+                         <div>
+                            <label for="exp-remarks" class="text-xs font-medium text-gray-400">Remarks</label>
+                            <input id="exp-remarks" name="remarks" class="custom-input w-full mt-1" placeholder="(Optional)">
+                        </div>
+                        <div class="sm:col-span-2 flex flex-col sm:flex-row gap-4 mt-4">
+                            <button type="submit" id="submit-expense-btn" class="btn btn-primary w-full">Submit Expense</button>
+                            <button type="button" id="ocr-btn" class="btn btn-secondary w-full">Attach Receipt (OCR)</button>
+                        </div>
+                    </form>
+                </div>`,
+
+            toast: (message, type) => `<div class="toast ${type}">${message}</div>`
+        };
+
+        // --- RENDER & EVENT HANDLERS ---
+        function render() {
+            employeeDashboardContainer.innerHTML = templates.dashboard();
+            toastContainer.innerHTML = state.ui.toastMessages.map(t => templates.toast(t.message, t.type)).join('');
+            attachEventListeners();
+        }
+
+        function showToast(message, type = 'success') {
+            const id = Date.now();
+            state.ui.toastMessages.push({ id, message, type });
+            render();
+            setTimeout(() => {
+                state.ui.toastMessages = state.ui.toastMessages.filter(t => t.id !== id);
+                render();
+            }, 3000);
+        }
+        
+        async function handleNewExpense(event) {
+            event.preventDefault();
+            const btn = document.getElementById('submit-expense-btn');
+            btn.disabled = true;
+            btn.innerHTML = `<div class="spinner"></div>`;
+
+            const form = event.target;
+            const formData = new FormData(form);
+            const newExpense = {
+                id: `exp${Date.now()}`,
+                userId: state.currentUser.id,
+                description: formData.get('description'),
+                category: formData.get('category'),
+                paidBy: formData.get('paidBy'),
+                amount: parseFloat(formData.get('amount')),
+                currency: formData.get('currency'),
+                date: formData.get('date'),
+                remarks: formData.get('remarks'),
+                status: 'Pending'
+            };
+
+            // Simulate API Call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            state.expenses.unshift(newExpense); // Add to the top of the list
+            state.ui.activeTab = 'submitted';
+            showToast('Expense submitted for approval!');
+            form.reset();
+            render();
+        }
+        
+        async function handleOcrUpload() {
+            const btn = document.getElementById('ocr-btn');
+            btn.disabled = true;
+            btn.innerHTML = `<div class="spinner"></div> Processing...`;
+            
+            showToast("Scanning receipt...", "info");
+
+            // Simulate API call for OCR
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            const form = document.getElementById('new-expense-form');
+            if(form) {
+                form.elements.description.value = "Dinner with Client";
+                form.elements.category.value = "Food";
+                form.elements.amount.value = "150.75";
+                form.elements.currency.value = "USD";
+                form.elements.date.value = new Date().toISOString().split('T')[0];
+                showToast("Receipt details auto-filled!", "success");
+            }
+            btn.disabled = false;
+            btn.innerHTML = `Attach Receipt (OCR)`;
+        }
+
+        function attachEventListeners() {
+            const newExpenseForm = document.getElementById('new-expense-form');
+            const ocrBtn = document.getElementById('ocr-btn');
+            const tabs = employeeDashboardContainer.querySelectorAll('.tab');
+
+            if (newExpenseForm) newExpenseForm.addEventListener('submit', handleNewExpense);
+            if (ocrBtn) ocrBtn.addEventListener('click', handleOcrUpload);
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    state.ui.activeTab = tab.dataset.tab;
+                    render();
+                });
+            });
+        }
+
+        // --- INITIAL RENDER ---
+        render();
+
+    </script>
+</body>
+</html>

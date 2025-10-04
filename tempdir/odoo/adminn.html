@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innovate Corp | Admin Panel</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2c2c2c;
+            --bg-tertiary: #3a3a3a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #444444;
+            --accent-primary: #8a63d2;
+            --success: #22c55e;
+            --font-main: 'Inter', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .custom-input, .custom-select {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .custom-input:focus, .custom-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(138, 99, 210, 0.3);
+        }
+        .custom-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+        .custom-select option { background-color: var(--bg-secondary); }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background-color: var(--accent-primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background-color: #6a4a9f; }
+        .btn-secondary { background-color: var(--bg-tertiary); color: var(--text-primary); }
+        .btn-secondary:hover:not(:disabled) { background-color: var(--border-color); }
+        
+        .toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .toast {
+            padding: 12px 16px; border-radius: 8px; color: white; font-weight: 500;
+            background-color: var(--success);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); animation: slideInUp 0.4s ease-out;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .spinner {
+            width: 20px; height: 20px; border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        .form-container {
+            transition: all 0.3s ease-in-out;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+        }
+        .form-container.visible {
+            max-height: 300px; /* Adjust as needed */
+            opacity: 1;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="p-4 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">Innovate Corp | Admin</h1>
+            <button class="btn btn-secondary text-sm py-2">Logout</button>
+        </div>
+    </header>
+
+    <main id="admin-panel-container" class="max-w-7xl mx-auto p-4 md:p-8">
+        <!-- Admin Panel content is rendered here by JavaScript -->
+    </main>
+    
+    <div id="toast-container"></div>
+
+    <script type="module">
+        const adminPanelContainer = document.getElementById('admin-panel-container');
+        const toastContainer = document.getElementById('toast-container');
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            users: [
+                { id: 'admin1', name: 'Kavya Joshi', email: 'admin@company.com', role: 'Admin' },
+                { id: 'manager1', name: 'Sarah Miller', email: 'sarah@company.com', role: 'Manager' },
+                { id: 'employee1', name: 'Marc', email: 'marc@company.com', role: 'Employee' },
+            ],
+            approvalRule: {
+                managerId: 'manager1',
+                approvers: [
+                    { id: 'user-tom', name: 'Tom', required: true },
+                    { id: 'user-mitchell', name: 'Mitchell', required: false },
+                ],
+                isSequential: false,
+                minApprovalPercentage: 60
+            },
+            ui: {
+                isUserFormVisible: false,
+                toastMessages: []
+            }
+        };
+
+        // --- TEMPLATES ---
+        const templates = {
+            adminPanel: () => `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    ${templates.userManagementCard()}
+                    ${templates.approvalRulesCard()}
+                </div>`,
+
+            userManagementCard: () => `
+                <div class="card p-6">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">User Management</h3>
+                        <button id="toggle-user-form-btn" class="btn btn-primary text-sm py-2">${state.ui.isUserFormVisible ? 'Cancel' : 'Add User'}</button>
+                    </div>
+                    <div id="add-user-form-container" class="form-container ${state.ui.isUserFormVisible ? 'visible' : ''}">
+                        <form id="add-user-form" class="space-y-4 sm:space-y-0 sm:flex sm:items-end sm:gap-4 pt-4 border-t border-gray-700">
+                           <div class="flex-grow">
+                               <label for="new-user-name" class="text-xs font-medium text-gray-400">Full Name</label>
+                               <input id="new-user-name" name="name" class="custom-input w-full mt-1" placeholder="e.g., Marc" required>
+                           </div>
+                           <div class="w-full sm:w-48">
+                               <label for="new-user-role" class="text-xs font-medium text-gray-400">Role</label>
+                               <select id="new-user-role" name="role" class="custom-select w-full mt-1"><option>Employee</option><option>Manager</option></select>
+                           </div>
+                           <div class="flex-grow">
+                               <label for="new-user-email" class="text-xs font-medium text-gray-400">Email</label>
+                               <input id="new-user-email" name="email" type="email" class="custom-input w-full mt-1" placeholder="marc@company.com" required>
+                           </div>
+                           <button type="submit" id="add-user-submit-btn" class="btn btn-secondary text-sm py-2 w-full sm:w-auto">Confirm Add</button>
+                        </form>
+                    </div>
+                    <div class="overflow-x-auto mt-4">
+                         <table class="w-full text-left">
+                            <thead class="text-sm text-gray-400"><tr><th class="p-2">User</th><th class="p-2">Role</th><th class="p-2">Email</th></tr></thead>
+                            <tbody>${state.users.map(u => `<tr class="border-t border-gray-800"><td class="p-2">${u.name}</td><td class="p-2">${u.role}</td><td class="p-2">${u.email}</td></tr>`).join('')}</tbody>
+                         </table>
+                    </div>
+                </div>`,
+
+            approvalRulesCard: () => {
+                const managers = state.users.filter(u => u.role === 'Manager');
+                return `
+                    <div class="card p-6">
+                        <h3 class="text-lg font-bold mb-4">Approval Rules</h3>
+                        <div class="space-y-4">
+                             <div>
+                                <label class="text-sm text-gray-400">Description about rules for miscellaneous expenses</label>
+                                <select id="rule-manager" class="w-full custom-select mt-1">${managers.map(m => `<option value="${m.id}" ${m.id === state.approvalRule.managerId ? 'selected' : ''}>Manager: ${m.name}</option>`).join('')}</select>
+                            </div>
+                             <div>
+                                <label class="text-sm text-gray-400">Approvers</label>
+                                <div id="approvers-list" class="mt-1 space-y-2 border border-dashed border-gray-600 p-3 rounded-md">
+                                    ${state.approvalRule.approvers.map(a => `
+                                        <div class="flex items-center justify-between text-sm hover:bg-gray-700 p-1 rounded">
+                                            <span>- ${a.name}</span>
+                                            <div class="flex items-center gap-4">
+                                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-approver-id="${a.id}" class="toggle-required" ${a.required ? 'checked' : ''}> Required</label>
+                                                <button data-approver-id="${a.id}" class="remove-approver text-red-400 hover:text-red-600 font-bold text-lg">&times;</button>
+                                            </div>
+                                        </div>`).join('') || `<p class="text-center text-gray-500 text-sm">No approvers added yet.</p>`}
+                                </div>
+                                <form id="add-approver-form" class="flex items-end gap-2 mt-2">
+                                    <input name="approverName" class="custom-input flex-1" placeholder="Add Approver Name" required>
+                                    <button type="submit" class="btn btn-secondary text-sm py-2">Add</button>
+                                </form>
+                            </div>
+                             <div class="flex items-center space-x-3"><input id="rule-sequential" type="checkbox" ${state.approvalRule.isSequential ? 'checked' : ''}><label for="rule-sequential">Approver's Sequence</label></div>
+                             <div>
+                                 <label class="text-sm text-gray-400">Minimum Approval Percentage</label>
+                                 <input id="rule-percentage" type="number" value="${state.approvalRule.minApprovalPercentage}" class="w-24 custom-input mt-1">
+                             </div>
+                        </div>
+                    </div>`;
+            },
+            
+            toast: (message) => `<div class="toast">${message}</div>`
+        };
+
+        // --- RENDER & EVENT HANDLERS ---
+        function render() {
+            adminPanelContainer.innerHTML = templates.adminPanel();
+            toastContainer.innerHTML = state.ui.toastMessages.map(t => templates.toast(t.message)).join('');
+            attachEventListeners();
+        }
+
+        function showToast(message) {
+            const id = Date.now();
+            state.ui.toastMessages.push({ id, message });
+            render();
+            setTimeout(() => {
+                state.ui.toastMessages = state.ui.toastMessages.filter(t => t.id !== id);
+                render();
+            }, 3000);
+        }
+
+        async function handleAddUser(event) {
+            event.preventDefault();
+            const btn = document.getElementById('add-user-submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = `<div class="spinner"></div>`;
+
+            const form = event.target;
+            const formData = new FormData(form);
+            const name = formData.get('name');
+            const role = formData.get('role');
+            const email = formData.get('email');
+            
+            // Simulate API Call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            state.users.push({id: `user${Date.now()}`, name, role, email});
+            state.ui.isUserFormVisible = false; // Hide form on success
+            showToast(`User '${name}' added successfully!`);
+            form.reset();
+            render();
+        }
+
+        function handleAddApprover(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const name = formData.get('approverName');
+            
+            state.approvalRule.approvers.push({ id: `approver-${Date.now()}`, name, required: false });
+            form.reset();
+            render(); 
+        }
+
+        function handleApproverListClick(event) {
+            const removeBtn = event.target.closest('.remove-approver');
+            if (removeBtn) {
+                const approverId = removeBtn.dataset.approverId;
+                state.approvalRule.approvers = state.approvalRule.approvers.filter(a => a.id !== approverId);
+                render();
+            }
+        }
+
+        function handleApproverListChange(event) {
+             const requiredCheckbox = event.target.closest('.toggle-required');
+             if (requiredCheckbox) {
+                const approverId = requiredCheckbox.dataset.approverId;
+                const approver = state.approvalRule.approvers.find(a => a.id === approverId);
+                if (approver) {
+                    approver.required = requiredCheckbox.checked;
+                }
+                console.log(state.approvalRule.approvers);
+             }
+        }
+
+        function attachEventListeners() {
+            const addUserForm = document.getElementById('add-user-form');
+            const addApproverForm = document.getElementById('add-approver-form');
+            const approversList = document.getElementById('approvers-list');
+            const toggleUserFormBtn = document.getElementById('toggle-user-form-btn');
+            
+            if (toggleUserFormBtn) {
+                toggleUserFormBtn.addEventListener('click', () => {
+                    state.ui.isUserFormVisible = !state.ui.isUserFormVisible;
+                    render();
+                });
+            }
+
+            if(addUserForm) addUserForm.addEventListener('submit', handleAddUser);
+            if(addApproverForm) addApproverForm.addEventListener('submit', handleAddApprover);
+            if(approversList) {
+                approversList.addEventListener('click', handleApproverListClick);
+                approversList.addEventListener('change', handleApproverListChange);
+            }
+        }
+
+        // --- INITIAL RENDER ---
+        render();
+
+    </script>
+</body>
+</html>
